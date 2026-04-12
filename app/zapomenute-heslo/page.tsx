@@ -17,7 +17,7 @@ export default function ZapomenutehesloPage() {
     setLoading(true)
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-hesla`,
+      redirectTo: `${window.location.origin}/auth/callback?next=/reset-hesla`,
     })
 
     if (error) {
