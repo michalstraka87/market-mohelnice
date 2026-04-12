@@ -43,9 +43,9 @@ export default function PrihlaseniPage() {
             <Image
               src="/images/logo_1.png"
               alt="Market Mohelnice"
-              width={240}
-              height={90}
-              className="mx-auto mb-6 w-60 h-auto"
+              width={320}
+              height={120}
+              className="mx-auto mb-6 w-80 h-auto"
               priority
             />
           </Link>
