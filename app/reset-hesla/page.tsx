@@ -44,7 +44,8 @@ export default function ResetHeslaPage() {
       return
     }
 
-    router.push('/prihlaseni?reset=ok')
+    await supabase.auth.signOut()
+    window.location.href = '/prihlaseni?reset=ok'
   }
 
   const ringStyle = { '--tw-ring-color': '#E84040' } as React.CSSProperties
