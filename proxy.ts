@@ -32,7 +32,7 @@ export async function proxy(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   // Chráněné routy — vyžadují přihlášení
-  const protectedPaths = ['/pridat', '/profil']
+  const protectedPaths = ['/pridat', '/profil', '/diskuze']
   const isProtected = protectedPaths.some(p => request.nextUrl.pathname.startsWith(p))
 
   if (isProtected && !user) {
