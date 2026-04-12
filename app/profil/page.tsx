@@ -82,8 +82,13 @@ export default function ProfilPage() {
   }
 
   const loadData = useCallback(async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { router.push('/prihlaseni?redirect=/profil'); return }
+    try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      await supabase.auth.signOut()
+      router.push('/prihlaseni?redirect=/profil')
+      return
+    }
 
     setAuthUser({ id: user.id, email: user.email ?? '' })
 
@@ -107,6 +112,10 @@ export default function ProfilPage() {
     }
     if (myListings) setListings(myListings as ListingRow[])
     setLoading(false)
+    } catch {
+      await supabase.auth.signOut()
+      router.push('/prihlaseni?redirect=/profil')
+    }
   }, [router, supabase])
 
   useEffect(() => { loadData() }, [loadData])
