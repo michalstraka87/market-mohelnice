@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState } from 'react'
@@ -47,15 +46,9 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-14">
 
           {/* Logo */}
-          <Link href="/" className="flex items-center flex-shrink-0">
-            <Image
-              src="/images/logo_1.png"
-              alt="Market Mohelnice"
-              width={160}
-              height={60}
-              className="h-10 w-auto object-contain"
-              priority
-            />
+          <Link href="/" className="flex items-center gap-2 flex-shrink-0">
+            <span className="text-xl font-bold" style={{ color: '#E84040' }}>Market</span>
+            <span className="text-xl font-light text-gray-600 hidden sm:inline">Mohelnice</span>
           </Link>
 
           {/* Střed: navigace — pouze desktop */}

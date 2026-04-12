@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
@@ -38,6 +39,16 @@ export default function PrihlaseniPage() {
     <div className="min-h-[calc(100vh-120px)] flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
+          <Link href="/">
+            <Image
+              src="/images/logo_1.png"
+              alt="Market Mohelnice"
+              width={240}
+              height={90}
+              className="mx-auto mb-6 w-60 h-auto"
+              priority
+            />
+          </Link>
           <h1 className="text-2xl font-bold text-gray-900">Přihlásit se</h1>
           <p className="text-gray-500 text-sm mt-1">Vítej zpátky v Market Mohelnice!</p>
         </div>
