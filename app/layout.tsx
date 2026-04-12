@@ -9,6 +9,10 @@ export const metadata: Metadata = {
   title: 'Market Mohelnice — Místní market Mohelnice a okolí',
   description: 'Komunitní marketplace pro Mohelnici a okolí. Nabídni nebo najdi věci, služby a zboží od sousedů.',
   keywords: 'mohelnice, bazar, marketplace, prodej, koupě, výměna',
+  icons: {
+    icon: '/images/favicon.png',
+    apple: '/images/favicon.png',
+  },
 }
 
 export default function RootLayout({
