@@ -80,7 +80,7 @@ export default async function HomePage({ searchParams }: PageProps) {
       {/* Hero */}
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Místní bazar Mohelnice a okolí
+          Místní market Mohelnice a okolí
         </h1>
         <p className="text-gray-500">
           Nakupuj a prodávej od sousedů — bez poplatků, bez prostředníků

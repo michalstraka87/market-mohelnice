@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'O nás — Market Mohelnice',
-  description: 'Komunitní bazar pro Mohelnici a okolí. Prodávej, daruj a vyměňuj s lidmi z okolí — bez poplatků, bez prostředníků.',
+  description: 'Místní market Mohelnice a okolí. Prodávej, daruj a vyměňuj s lidmi z okolí — bez poplatků, bez prostředníků.',
 }
 
 const HODNOTY = [
@@ -59,7 +59,7 @@ export default function ONasPage() {
           Market Mohelnice
         </h1>
         <p className="text-lg text-gray-500 leading-relaxed max-w-xl mx-auto">
-          Komunitní bazar pro Mohelnici a okolí. Místo, kde si sousedé pomáhají,
+          Místní market Mohelnice a okolí. Místo, kde si sousedé pomáhají,
           věci mají druhý život a slušnost je samozřejmostí.
         </p>
         <Link
@@ -81,7 +81,7 @@ export default function ONasPage() {
             ze kterého vyrostly děti. Knihy, které nikdo nečte.
           </p>
           <p>
-            Vznikl proto jednoduchý místní bazar — bez poplatků, bez složité registrace,
+            Vznikl proto jednoduchý místní market — bez poplatků, bez složité registrace,
             bez anonymních cizinců z druhého konce republiky. Jen sousedé, kteří si navzájem
             pomáhají a se kterými se příští týden potkáš na náměstí.
           </p>

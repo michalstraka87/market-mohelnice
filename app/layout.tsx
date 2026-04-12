@@ -6,7 +6,7 @@ import { ToastProvider } from '@/components/ui/ToastProvider'
 import Navbar from '@/components/layout/Navbar'
 
 export const metadata: Metadata = {
-  title: 'Market Mohelnice — Místní bazar',
+  title: 'Market Mohelnice — Místní market Mohelnice a okolí',
   description: 'Komunitní marketplace pro Mohelnici a okolí. Nabídni nebo najdi věci, služby a zboží od sousedů.',
   keywords: 'mohelnice, bazar, marketplace, prodej, koupě, výměna',
 }
