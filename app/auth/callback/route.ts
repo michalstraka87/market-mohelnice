@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
       // Vytvoř řádek v public.users pokud ještě neexistuje (Google OAuth uživatelé)
       const user = data.user
       const meta = user.user_metadata ?? {}
-      await supabase.from('users').upsert(
+      const { error: upsertError } = await supabase.from('users').upsert(
         {
           id:         user.id,
           full_name:  meta.full_name ?? meta.name ?? user.email?.split('@')[0] ?? 'Uživatel',
@@ -39,6 +39,10 @@ export async function GET(request: NextRequest) {
         },
         { onConflict: 'id', ignoreDuplicates: true }
       )
+
+      if (upsertError) {
+        console.error('[auth/callback] upsert users failed:', upsertError.message, upsertError.code)
+      }
 
       return NextResponse.redirect(`${origin}${next}`)
     }

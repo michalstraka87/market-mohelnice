@@ -29,6 +29,7 @@ export default function ProfilPage() {
   const [prof, setProf]           = useState<UserRow | null>(null)
   const [listings, setListings]   = useState<ListingRow[]>([])
   const [loading, setLoading]     = useState(true)
+  const [profileError, setProfileError] = useState('')
   const [tab, setTab]             = useState<Tab>('profil')
 
   // Edit stav
@@ -79,56 +80,70 @@ export default function ProfilPage() {
   }
 
   const loadData = useCallback(async () => {
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      window.location.href = '/prihlaseni?redirect=/profil'
-      return
-    }
+    try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      if (authError || !user) {
+        window.location.href = '/prihlaseni?redirect=/profil'
+        return
+      }
 
-    setAuthUser({ id: user.id, email: user.email ?? '' })
+      setAuthUser({ id: user.id, email: user.email ?? '' })
 
-    const [{ data: profile }, { data: myListings }] = await Promise.all([
-      (supabase as any).from('users').select('*').eq('id', user.id).single(),
-      (supabase as any)
-        .from('listings')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false }),
-    ])
+      const [{ data: profile }, { data: myListings }] = await Promise.all([
+        (supabase as any).from('users').select('*').eq('id', user.id).single(),
+        (supabase as any)
+          .from('listings')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false }),
+      ])
 
-    // Pokud uživatel nemá řádek v public.users (např. Google OAuth), vytvoř ho
-    if (!profile) {
-      const meta = user.user_metadata ?? {}
-      await (supabase as any).from('users').insert({
-        id:         user.id,
-        full_name:  meta.full_name ?? meta.name ?? user.email?.split('@')[0] ?? 'Uživatel',
-        avatar_url: meta.avatar_url ?? meta.picture ?? null,
-        city:       '',
-      })
-      // Znovu načti
-      const { data: newProfile } = await (supabase as any)
-        .from('users').select('*').eq('id', user.id).single()
-      if (newProfile) {
-        setProf(newProfile as UserRow)
+      // Pokud uživatel nemá řádek v public.users (např. Google OAuth), vytvoř ho
+      if (!profile) {
+        const meta = user.user_metadata ?? {}
+        const { error: insertError } = await (supabase as any).from('users').upsert(
+          {
+            id:         user.id,
+            full_name:  meta.full_name ?? meta.name ?? user.email?.split('@')[0] ?? 'Uživatel',
+            avatar_url: meta.avatar_url ?? meta.picture ?? null,
+            city:       '',
+          },
+          { onConflict: 'id', ignoreDuplicates: true }
+        )
+        if (insertError) {
+          console.error('[profil] upsert users failed:', insertError.message, insertError.code)
+          setProfileError(`Nepodařilo se vytvořit profil: ${insertError.message}`)
+          return
+        }
+        // Znovu načti
+        const { data: newProfile } = await (supabase as any)
+          .from('users').select('*').eq('id', user.id).single()
+        if (newProfile) {
+          setProf(newProfile as UserRow)
+          setForm({
+            full_name: newProfile.full_name ?? '',
+            city:      newProfile.city ?? '',
+            phone:     newProfile.phone ?? '',
+            bio:       newProfile.bio ?? '',
+          })
+        }
+      } else {
+        setProf(profile as UserRow)
         setForm({
-          full_name: newProfile.full_name ?? '',
-          city:      newProfile.city ?? '',
-          phone:     newProfile.phone ?? '',
-          bio:       newProfile.bio ?? '',
+          full_name: profile.full_name ?? '',
+          city:      profile.city ?? '',
+          phone:     profile.phone ?? '',
+          bio:       profile.bio ?? '',
         })
       }
-    } else {
-      setProf(profile as UserRow)
-      setForm({
-        full_name: profile.full_name ?? '',
-        city:      profile.city ?? '',
-        phone:     profile.phone ?? '',
-        bio:       profile.bio ?? '',
-      })
-    }
 
-    if (myListings) setListings(myListings as ListingRow[])
-    setLoading(false)
+      if (myListings) setListings(myListings as ListingRow[])
+    } catch (e) {
+      console.error('[profil] loadData crashed:', e)
+      setProfileError('Nastala neočekávaná chyba při načítání profilu.')
+    } finally {
+      setLoading(false)
+    }
   }, [supabase])
 
   useEffect(() => { loadData() }, [loadData])
@@ -184,6 +199,18 @@ export default function ProfilPage() {
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center text-gray-400">Načítám...</div>
+  }
+
+  if (profileError) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-6">
+          <p className="font-semibold mb-1">Chyba při vytváření profilu</p>
+          <p className="text-sm">{profileError}</p>
+          <p className="text-sm mt-3 text-red-500">Zkus se odhlásit a přihlásit znovu. Pokud problém přetrvá, kontaktuj správce.</p>
+        </div>
+      </div>
+    )
   }
 
   const inputClass = `w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm
