@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-const PROTECTED = ['/pridat', '/profil']
+const PROTECTED = ['/pridat', '/profil', '/admin']
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -53,5 +53,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/pridat', '/pridat/:path*', '/profil', '/profil/:path*'],
+  matcher: ['/pridat', '/pridat/:path*', '/profil', '/profil/:path*', '/admin', '/admin/:path*'],
 }

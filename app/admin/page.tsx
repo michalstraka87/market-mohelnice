@@ -24,6 +24,15 @@ export default function AdminPage() {
 
   const loadAll = useCallback(async () => {
     setLoading(true)
+
+    // Ověř že přihlášený uživatel je admin
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.user) { window.location.href = '/prihlaseni'; return }
+
+    const { data: profile } = await (supabase as any)
+      .from('users').select('is_admin').eq('id', session.user.id).single()
+    if (!profile?.is_admin) { window.location.href = '/'; return }
+
     const [{ data: l }, { data: u }, { data: p }] = await Promise.all([
       (supabase as any)
         .from('listings')
