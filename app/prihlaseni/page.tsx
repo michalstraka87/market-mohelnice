@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
@@ -10,6 +10,15 @@ export default function PrihlaseniPage() {
   const searchParams = useSearchParams()
   const redirect = searchParams.get('redirect') || '/'
   const supabase = createClient()
+
+  // Pokud už je přihlášený, rovnou přesměruj
+  useEffect(() => {
+    supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        window.location.href = redirect
+      }
+    })
+  }, [])
 
   const [email, setEmail]             = useState('')
   const [password, setPassword]       = useState('')
@@ -27,7 +36,7 @@ export default function PrihlaseniPage() {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password })
 
       if (error) {
-        setError('Nesprávné heslo, nebo účet byl vytvořen přes Google — zkus tlačítko „Pokračovat přes Google".')
+        setError('Nesprávný e-mail nebo heslo.')
         return
       }
 
