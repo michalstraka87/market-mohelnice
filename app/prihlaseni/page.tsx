@@ -21,15 +21,28 @@ export default function PrihlaseniPage() {
 
   const handleGoogle = async () => {
     setLoadingGoogle(true)
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirect)}`,
-      },
-    })
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirect)}`,
+        },
+      })
+      if (error) {
+        setError(`Google chyba: ${error.message}`)
+        setLoadingGoogle(false)
+      } else if (!data.url) {
+        setError('Google přihlášení není nakonfigurováno. Zkus e-mail.')
+        setLoadingGoogle(false)
+      }
+      // Pokud data.url existuje, prohlížeč přesměruje automaticky
+    } catch (e: unknown) {
+      setError(`Připojení selhalo: ${e instanceof Error ? e.message : String(e)}`)
+      setLoadingGoogle(false)
+    }
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault()
     setError('')
     setLoading(true)
