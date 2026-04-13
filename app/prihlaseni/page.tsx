@@ -50,25 +50,19 @@ export default function PrihlaseniPage() {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password })
 
-      console.log('[login] error:', error)
-      console.log('[login] user:', data?.user?.id)
-      console.log('[login] session:', !!data?.session)
-
       if (error) {
-        setError(`Chyba: ${error.message}`)
+        setError('Nesprávné heslo, nebo účet byl vytvořen přes Google — zkus tlačítko „Pokračovat přes Google".')
         return
       }
 
       if (!data?.session) {
-        setError('Přihlášení selhalo — session nebyla vytvořena.')
+        setError('Přihlášení selhalo — zkus to znovu.')
         return
       }
 
-      // Hard redirect — vynutí načtení session z cookies
       window.location.href = redirect
-    } catch (e: unknown) {
-      console.error('[login] exception:', e)
-      setError(`Připojení selhalo: ${e instanceof Error ? e.message : String(e)}`)
+    } catch {
+      setError('Připojení selhalo. Zkus to znovu.')
     } finally {
       setLoading(false)
     }
