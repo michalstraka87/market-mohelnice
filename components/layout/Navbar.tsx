@@ -13,20 +13,24 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const supabase = createClient()
 
+  // onAuthStateChange musí být SYNCHRONNÍ — async callback drží auth lock
+  // a blokuje signInWithPassword / signOut
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      const u = session?.user ?? null
-      setUser(u)
-      if (u) {
-        const { data: profile } = await (supabase as any)
-          .from('users').select('is_admin').eq('id', u.id).single()
-        setIsAdmin(profile?.is_admin ?? false)
-      } else {
-        setIsAdmin(false)
-      }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
     })
     return () => subscription.unsubscribe()
   }, [])
+
+  // Admin check — spouštíme mimo onAuthStateChange, aby neuvolal lock
+  useEffect(() => {
+    if (!user) { setIsAdmin(false); return }
+    ;(supabase as any)
+      .from('users').select('is_admin').eq('id', user.id).single()
+      .then(({ data }: { data: { is_admin: boolean } | null }) => {
+        setIsAdmin(data?.is_admin ?? false)
+      })
+  }, [user])
 
   // Zavři menu při změně stránky
   useEffect(() => { setMenuOpen(false) }, [pathname])
