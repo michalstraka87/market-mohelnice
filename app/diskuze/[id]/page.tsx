@@ -37,8 +37,11 @@ export default function PostDetailPage() {
   }, [id, supabase])
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setUser(data.session?.user ? { id: data.session.user.id } : null))
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ? { id: session.user.id } : null)
+    })
     loadData()
+    return () => subscription.unsubscribe()
   }, [loadData, supabase])
 
   const handleReply = async (e: React.FormEvent) => {

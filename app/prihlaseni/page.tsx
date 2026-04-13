@@ -13,11 +13,12 @@ export default function PrihlaseniPage() {
 
   // Pokud už je přihlášený, rovnou přesměruj
   useEffect(() => {
-    supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if ((event === 'INITIAL_SESSION' || event === 'SIGNED_IN') && session) {
         window.location.href = redirect
       }
     })
+    return () => subscription.unsubscribe()
   }, [])
 
   const [email, setEmail]             = useState('')

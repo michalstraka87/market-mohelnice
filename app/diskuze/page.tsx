@@ -31,8 +31,11 @@ export default function DiskuzePage() {
   }, [supabase])
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setUser(data.session?.user ? { id: data.session.user.id } : null))
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ? { id: session.user.id } : null)
+    })
     loadPosts()
+    return () => subscription.unsubscribe()
   }, [loadPosts, supabase])
 
   const handlePost = async (e: React.FormEvent) => {

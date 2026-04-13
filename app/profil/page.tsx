@@ -79,58 +79,62 @@ export default function ProfilPage() {
   }
 
   const loadData = useCallback(async () => {
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user ?? null
-    const authError = !user
-    if (authError) {
-      window.location.href = '/prihlaseni?redirect=/profil'
-      return
-    }
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const user = session?.user ?? null
+      if (!user) {
+        window.location.href = '/prihlaseni?redirect=/profil'
+        return
+      }
 
-    setAuthUser({ id: user.id, email: user.email ?? '' })
+      setAuthUser({ id: user.id, email: user.email ?? '' })
 
-    const [{ data: profile }, { data: myListings }] = await Promise.all([
-      (supabase as any).from('users').select('*').eq('id', user.id).single(),
-      (supabase as any)
-        .from('listings')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false }),
-    ])
+      const [{ data: profile }, { data: myListings }] = await Promise.all([
+        (supabase as any).from('users').select('*').eq('id', user.id).single(),
+        (supabase as any)
+          .from('listings')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false }),
+      ])
 
-    // Pokud uživatel nemá řádek v public.users (např. Google OAuth), vytvoř ho
-    if (!profile) {
-      const meta = user.user_metadata ?? {}
-      await (supabase as any).from('users').insert({
-        id:         user.id,
-        full_name:  meta.full_name ?? meta.name ?? user.email?.split('@')[0] ?? 'Uživatel',
-        avatar_url: meta.avatar_url ?? meta.picture ?? null,
-        city:       '',
-      })
-      // Znovu načti
-      const { data: newProfile } = await (supabase as any)
-        .from('users').select('*').eq('id', user.id).single()
-      if (newProfile) {
-        setProf(newProfile as UserRow)
+      // Pokud uživatel nemá řádek v public.users (např. Google OAuth), vytvoř ho
+      if (!profile) {
+        const meta = user.user_metadata ?? {}
+        await (supabase as any).from('users').insert({
+          id:         user.id,
+          full_name:  meta.full_name ?? meta.name ?? user.email?.split('@')[0] ?? 'Uživatel',
+          avatar_url: meta.avatar_url ?? meta.picture ?? null,
+          city:       '',
+        })
+        // Znovu načti
+        const { data: newProfile } = await (supabase as any)
+          .from('users').select('*').eq('id', user.id).single()
+        if (newProfile) {
+          setProf(newProfile as UserRow)
+          setForm({
+            full_name: newProfile.full_name ?? '',
+            city:      newProfile.city ?? '',
+            phone:     newProfile.phone ?? '',
+            bio:       newProfile.bio ?? '',
+          })
+        }
+      } else {
+        setProf(profile as UserRow)
         setForm({
-          full_name: newProfile.full_name ?? '',
-          city:      newProfile.city ?? '',
-          phone:     newProfile.phone ?? '',
-          bio:       newProfile.bio ?? '',
+          full_name: profile.full_name ?? '',
+          city:      profile.city ?? '',
+          phone:     profile.phone ?? '',
+          bio:       profile.bio ?? '',
         })
       }
-    } else {
-      setProf(profile as UserRow)
-      setForm({
-        full_name: profile.full_name ?? '',
-        city:      profile.city ?? '',
-        phone:     profile.phone ?? '',
-        bio:       profile.bio ?? '',
-      })
-    }
 
-    if (myListings) setListings(myListings as ListingRow[])
-    setLoading(false)
+      if (myListings) setListings(myListings as ListingRow[])
+    } catch (err) {
+      console.error('loadData error:', err)
+    } finally {
+      setLoading(false)
+    }
   }, [supabase])
 
   useEffect(() => { loadData() }, [loadData])
