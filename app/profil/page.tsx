@@ -79,8 +79,10 @@ export default function ProfilPage() {
   }
 
   const loadData = useCallback(async () => {
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user ?? null
+    const authError = !user
+    if (authError) {
       window.location.href = '/prihlaseni?redirect=/profil'
       return
     }
