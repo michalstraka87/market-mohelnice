@@ -3,19 +3,19 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 export default function PrihlaseniPage() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const redirect = searchParams.get('redirect') || '/'
   const supabase = createClient()
 
-  const [email, setEmail]       = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError]       = useState('')
-  const [loading, setLoading]       = useState(false)
+  const [email, setEmail]             = useState('')
+  const [password, setPassword]       = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [error, setError]             = useState('')
+  const [loading, setLoading]         = useState(false)
   const [loadingGoogle, setLoadingGoogle] = useState(false)
   const resetOk = searchParams.get('reset') === 'ok'
 
@@ -42,8 +42,8 @@ export default function PrihlaseniPage() {
         return
       }
 
-      router.push(redirect)
-      router.refresh()
+      // Hard redirect — vynutí načtení session z cookies
+      window.location.href = redirect
     } catch {
       setError('Připojení selhalo. Zkus to znovu.')
     } finally {
@@ -104,16 +104,39 @@ export default function PrihlaseniPage() {
                 Zapomněl jsi heslo?
               </Link>
             </div>
-            <input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-              placeholder="••••••••"
-              className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm
-                         focus:outline-none focus:ring-2 focus:border-transparent"
-              style={{ '--tw-ring-color': '#E84040' } as React.CSSProperties}
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+                placeholder="••••••••"
+                className="w-full px-3.5 py-2.5 pr-10 border border-gray-200 rounded-xl text-sm
+                           focus:outline-none focus:ring-2 focus:border-transparent"
+                style={{ '--tw-ring-color': '#E84040' } as React.CSSProperties}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(v => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                tabIndex={-1}
+              >
+                {showPassword ? (
+                  // oko zavřené
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                  </svg>
+                ) : (
+                  // oko otevřené
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
 
           <button

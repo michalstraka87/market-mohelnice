@@ -1,6 +1,5 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
 import { useEffect, useState, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -23,7 +22,6 @@ function formatPrice(listing: ListingRow): string {
 }
 
 export default function ProfilPage() {
-  const router = useRouter()
   const supabase = createClient()
   const { showToast } = useToast()
 
@@ -81,11 +79,9 @@ export default function ProfilPage() {
   }
 
   const loadData = useCallback(async () => {
-    try {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      await supabase.auth.signOut()
-      router.push('/prihlaseni?redirect=/profil')
+      window.location.href = '/prihlaseni?redirect=/profil'
       return
     }
 
@@ -100,7 +96,28 @@ export default function ProfilPage() {
         .order('created_at', { ascending: false }),
     ])
 
-    if (profile) {
+    // Pokud uživatel nemá řádek v public.users (např. Google OAuth), vytvoř ho
+    if (!profile) {
+      const meta = user.user_metadata ?? {}
+      await (supabase as any).from('users').insert({
+        id:         user.id,
+        full_name:  meta.full_name ?? meta.name ?? user.email?.split('@')[0] ?? 'Uživatel',
+        avatar_url: meta.avatar_url ?? meta.picture ?? null,
+        city:       '',
+      })
+      // Znovu načti
+      const { data: newProfile } = await (supabase as any)
+        .from('users').select('*').eq('id', user.id).single()
+      if (newProfile) {
+        setProf(newProfile as UserRow)
+        setForm({
+          full_name: newProfile.full_name ?? '',
+          city:      newProfile.city ?? '',
+          phone:     newProfile.phone ?? '',
+          bio:       newProfile.bio ?? '',
+        })
+      }
+    } else {
       setProf(profile as UserRow)
       setForm({
         full_name: profile.full_name ?? '',
@@ -109,13 +126,10 @@ export default function ProfilPage() {
         bio:       profile.bio ?? '',
       })
     }
+
     if (myListings) setListings(myListings as ListingRow[])
     setLoading(false)
-    } catch {
-      await supabase.auth.signOut()
-      router.push('/prihlaseni?redirect=/profil')
-    }
-  }, [router, supabase])
+  }, [supabase])
 
   useEffect(() => { loadData() }, [loadData])
 
