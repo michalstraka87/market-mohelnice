@@ -1,37 +1,10 @@
-import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-// Proxy slouží pouze k refresh session cookies.
-// Auth ochrana chráněných stránek je řešena přímo v page komponentách přes getSession().
-export async function proxy(request: NextRequest) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-  if (!supabaseUrl || !supabaseKey) {
-    return NextResponse.next({ request })
-  }
-
-  let supabaseResponse = NextResponse.next({ request })
-
-  const supabase = createServerClient(supabaseUrl, supabaseKey, {
-    cookies: {
-      getAll() {
-        return request.cookies.getAll()
-      },
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-        supabaseResponse = NextResponse.next({ request })
-        cookiesToSet.forEach(({ name, value, options }) =>
-          supabaseResponse.cookies.set(name, value, options)
-        )
-      },
-    },
-  })
-
-  // Refresh session — drží cookies aktuální
-  await supabase.auth.getSession()
-
-  return supabaseResponse
+// Proxy je pasivní — neprovádí žádné Supabase volání.
+// Všechny chráněné stránky jsou 'use client' a auth řeší přes getSession() samy.
+// Jakékoliv server-side volání Supabase auth zde způsobuje lock contention s klientem.
+export function proxy(request: NextRequest) {
+  return NextResponse.next({ request })
 }
 
 export const config = {
