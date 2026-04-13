@@ -1,14 +1,13 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
 
 export default function Navbar() {
   const pathname              = usePathname()
-  const router                = useRouter()
   const [user, setUser]       = useState<User | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -83,7 +82,8 @@ export default function Navbar() {
                 </Link>
                 <button
                   onClick={handleSignOut}
-                  className="text-sm text-gray-500 hover:text-gray-700 px-3 py-2 rounded-full hover:bg-gray-100 transition-colors"
+                  className="text-sm font-medium text-white px-4 py-2 rounded-full transition-opacity hover:opacity-90"
+                  style={{ backgroundColor: '#E84040' }}
                 >
                   Odhlásit
                 </button>
@@ -147,7 +147,8 @@ export default function Navbar() {
               </Link>
               <button
                 onClick={handleSignOut}
-                className="w-full text-left px-3 py-2.5 rounded-xl text-sm text-red-500 hover:bg-red-50 transition-colors"
+                className="w-full text-center px-3 py-2.5 rounded-xl text-sm font-medium text-white transition-opacity hover:opacity-90"
+                style={{ backgroundColor: '#E84040' }}
               >
                 Odhlásit se
               </button>

@@ -6,7 +6,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { useToast } from '@/components/ui/ToastProvider'
-import { PRICE_TYPE_LABELS } from '@/lib/constants'
 import type { UserRow, ListingRow } from '@/lib/supabase/types'
 
 type Tab = 'profil' | 'inzeraty'
@@ -166,8 +165,7 @@ export default function ProfilPage() {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
-    router.push('/')
-    router.refresh()
+    window.location.href = '/'
   }
 
   if (loading) {
