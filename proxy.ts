@@ -13,8 +13,9 @@ export function proxy(request: NextRequest) {
 
   if (isProtected || adminPath) {
     // Optimistic check: does an auth cookie exist?
+    // Supabase splits large tokens into chunks: sb-...-auth-token.0, .1 etc.
     const hasSession = request.cookies.getAll().some(
-      c => c.name.startsWith('sb-') && c.name.endsWith('-auth-token')
+      c => c.name.includes('-auth-token')
     )
 
     if (!hasSession) {
