@@ -16,8 +16,7 @@ export default function ContactButton({ phone, listingTitle, listingId }: Contac
   const supabase = createClient()
 
   const handleReveal = async () => {
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user ?? null
+    const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       router.push(`/prihlaseni?redirect=/inzerat/${listingId}`)
       return

@@ -8,26 +8,21 @@ import type { User } from '@supabase/supabase-js'
 
 export default function Navbar() {
   const pathname              = usePathname()
-  const [user, setUser]         = useState<User | null>(null)
-  const [isAdmin, setIsAdmin]   = useState(false)
+  const [user, setUser]       = useState<User | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
-  const [signingOut, setSigningOut] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      try {
-        const u = session?.user ?? null
-        setUser(u)
-        if (u) {
-          const { data: profile } = await (supabase as any)
-            .from('users').select('is_admin').eq('id', u.id).single()
-          setIsAdmin(profile?.is_admin ?? false)
-        } else {
-          setIsAdmin(false)
-        }
-      } catch {
-        // ignoruj chyby v auth state change
+      const u = session?.user ?? null
+      setUser(u)
+      if (u) {
+        const { data: profile } = await (supabase as any)
+          .from('users').select('is_admin').eq('id', u.id).single()
+        setIsAdmin(profile?.is_admin ?? false)
+      } else {
+        setIsAdmin(false)
       }
     })
     return () => subscription.unsubscribe()
@@ -37,12 +32,7 @@ export default function Navbar() {
   useEffect(() => { setMenuOpen(false) }, [pathname])
 
   const handleSignOut = async () => {
-    setSigningOut(true)
-    try {
-      await supabase.auth.signOut()
-    } catch {
-      // ignoruj chybu, stejně přesměrujeme
-    }
+    await supabase.auth.signOut()
     window.location.href = '/'
   }
 
@@ -90,11 +80,10 @@ export default function Navbar() {
                 </Link>
                 <button
                   onClick={handleSignOut}
-                  disabled={signingOut}
-                  className="text-sm font-medium text-white px-4 py-2 rounded-full transition-opacity hover:opacity-90 disabled:opacity-60"
+                  className="text-sm font-medium text-white px-4 py-2 rounded-full transition-opacity hover:opacity-90"
                   style={{ backgroundColor: '#E84040' }}
                 >
-                  {signingOut ? 'Odhlašuji...' : 'Odhlásit'}
+                  Odhlásit
                 </button>
               </div>
             ) : (
@@ -156,11 +145,10 @@ export default function Navbar() {
               </Link>
               <button
                 onClick={handleSignOut}
-                disabled={signingOut}
-                className="w-full text-center px-3 py-2.5 rounded-xl text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+                className="w-full text-center px-3 py-2.5 rounded-xl text-sm font-medium text-white transition-opacity hover:opacity-90"
                 style={{ backgroundColor: '#E84040' }}
               >
-                {signingOut ? 'Odhlašuji...' : 'Odhlásit se'}
+                Odhlásit se
               </button>
             </>
           ) : (

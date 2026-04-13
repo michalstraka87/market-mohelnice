@@ -9,7 +9,11 @@
       "Bash(node -e \"const p = require\\('./node_modules/tailwindcss/package.json'\\); console.log\\(JSON.stringify\\(p.exports['.'], null, 2\\)\\)\")",
       "Read(//c/Users/strakam/Desktop/Agenti//**)",
       "Read(//c/Users/strakam/Desktop/Agenti/**)",
-      "Bash(node -e \"const p = require\\('@tailwindcss/postcss'\\); console.log\\(p\\)\")"
+      "Bash(node -e \"const p = require\\('@tailwindcss/postcss'\\); console.log\\(p\\)\")",
+      "Bash(npm uninstall:*)",
+      "Bash(grep -rA5 \"function isChunkLike\" \"c:/Users/strakam/Desktop/Agenti/mohelnice-marketplace/node_modules/@supabase/ssr/\" --include=\"*.js\")",
+      "Bash(grep -v \"^//\")",
+      "Bash(xargs grep:*)"
     ]
   }
 }
