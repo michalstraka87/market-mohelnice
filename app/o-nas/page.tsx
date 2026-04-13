@@ -40,12 +40,13 @@ const HODNOTY = [
 ]
 
 const PRAVIDLA = [
-  'Uveď pravdivý popis a stav věci — skryté vady předem popiš.',
-  'Domluvenou schůzku dodržuj, nebo včas zruš.',
-  'Cenu výrazně nesráž až při předání — dohodnutá cena platí.',
-  'Nezveřejňuj osobní kontakty třetích osob.',
-  'Nepoužívej marketplace k podnikatelskému prodeji nového zboží.',
-  'Respektuj rozhodnutí prodávajícího, i když si vybral jiného zájemce.',
+  { nadpis: 'Poctivost při popisu', text: 'Uveď pravdivý a přesný popis věci včetně reálného stavu. Všechny skryté vady nebo nedostatky popiš předem.' },
+  { nadpis: 'Dodržování domluv', text: 'Domluvenou schůzku dodržuj. Pokud nemůžeš přijít, zruš ji včas.' },
+  { nadpis: 'Dohodnutá cena platí', text: 'Cenu výrazně nesrážej až při předání věci. Cena, na které se domluvíte, platí.' },
+  { nadpis: 'Ochrana soukromí', text: 'Nezveřejňuj osobní kontakty třetích osob (telefon, e-mail, sociální sítě apod.).' },
+  { nadpis: 'Zákaz podnikání', text: 'Platformu nepoužívej k podnikatelskému prodeji nového zboží (jako firma nebo prodejce na živnost).' },
+  { nadpis: 'Respekt k rozhodnutí prodávajícího', text: 'Pokud si prodávající vybere jiného zájemce, respektuj to.' },
+  { nadpis: 'Hodnocení uživatelů', text: 'Hodnocení ostatních uživatelů je důležitou součástí komunity. Uživatel s hodnocením 2 hvězdy a méně bude automaticky zablokován.' },
 ]
 
 export default function ONasPage() {
@@ -116,7 +117,10 @@ export default function ONasPage() {
                 style={{ backgroundColor: '#E84040' }}>
                 {i + 1}
               </span>
-              {p}
+              <div>
+                <span className="font-semibold text-gray-900">{p.nadpis}: </span>
+                {p.text}
+              </div>
             </li>
           ))}
         </ul>
