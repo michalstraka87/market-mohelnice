@@ -9,26 +9,25 @@ import { createClient } from '@/lib/supabase/client'
 export default function PrihlaseniPage() {
   const searchParams = useSearchParams()
   const redirect = searchParams.get('redirect') || '/'
+  const authError = searchParams.get('error')
   const supabase = createClient()
 
-  // Pokud už je přihlášený, rovnou přesměruj
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if ((event === 'INITIAL_SESSION' || event === 'SIGNED_IN') && session) {
-        window.location.href = redirect
-      }
-    })
-    return () => subscription.unsubscribe()
-  }, [])
-
-  const [email, setEmail]             = useState('')
-  const [password, setPassword]       = useState('')
+  const [email, setEmail]               = useState('')
+  const [password, setPassword]         = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [error, setError]             = useState('')
-  const [loading, setLoading]         = useState(false)
-  const resetOk = searchParams.get('reset') === 'ok'
+  const [error, setError]               = useState(
+    authError ? 'Přihlášení selhalo. Zkus to znovu.' : ''
+  )
+  const [loading, setLoading] = useState(false)
 
-  const handleSubmit = async (e: React.SyntheticEvent) => {
+  // Pokud je uživatel už přihlášený, přesměruj ho
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) window.location.href = redirect
+    })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setLoading(true)
@@ -41,7 +40,7 @@ export default function PrihlaseniPage() {
         return
       }
 
-      if (!data?.session) {
+      if (!data.session) {
         setError('Přihlášení selhalo — zkus to znovu.')
         return
       }
@@ -53,6 +52,8 @@ export default function PrihlaseniPage() {
       setLoading(false)
     }
   }
+
+  const ringStyle = { '--tw-ring-color': '#E84040' } as React.CSSProperties
 
   return (
     <div className="min-h-[calc(100vh-120px)] flex items-center justify-center px-4">
@@ -72,12 +73,10 @@ export default function PrihlaseniPage() {
           <p className="text-gray-500 text-sm mt-1">Vítej zpátky v Market Mohelnice!</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
-          {resetOk && (
-            <div className="bg-green-50 border border-green-200 text-green-700 text-sm rounded-lg px-4 py-3">
-              Heslo bylo změněno. Přihlaš se novým heslem.
-            </div>
-          )}
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4"
+        >
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
               {error}
@@ -85,25 +84,27 @@ export default function PrihlaseniPage() {
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              E-mail
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">E-mail</label>
             <input
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
               required
+              autoComplete="email"
               placeholder="vas@email.cz"
               className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm
                          focus:outline-none focus:ring-2 focus:border-transparent"
-              style={{ '--tw-ring-color': '#E84040' } as React.CSSProperties}
+              style={ringStyle}
             />
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="block text-sm font-medium text-gray-700">Heslo</label>
-              <Link href="/zapomenute-heslo" className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
+              <Link
+                href="/zapomenute-heslo"
+                className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+              >
                 Zapomněl jsi heslo?
               </Link>
             </div>
@@ -113,10 +114,11 @@ export default function PrihlaseniPage() {
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 required
+                autoComplete="current-password"
                 placeholder="••••••••"
                 className="w-full px-3.5 py-2.5 pr-10 border border-gray-200 rounded-xl text-sm
                            focus:outline-none focus:ring-2 focus:border-transparent"
-                style={{ '--tw-ring-color': '#E84040' } as React.CSSProperties}
+                style={ringStyle}
               />
               <button
                 type="button"
@@ -125,14 +127,12 @@ export default function PrihlaseniPage() {
                 tabIndex={-1}
               >
                 {showPassword ? (
-                  // oko zavřené
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
                     <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
                     <line x1="1" y1="1" x2="23" y2="23"/>
                   </svg>
                 ) : (
-                  // oko otevřené
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                     <circle cx="12" cy="12" r="3"/>
@@ -145,8 +145,7 @@ export default function PrihlaseniPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full text-white font-medium py-3 rounded-xl transition-opacity
-                       disabled:opacity-60 mt-2"
+            className="w-full text-white font-medium py-3 rounded-xl transition-opacity disabled:opacity-60 mt-2"
             style={{ backgroundColor: '#E84040' }}
           >
             {loading ? 'Přihlašuji...' : 'Přihlásit se'}
