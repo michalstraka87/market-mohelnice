@@ -37,7 +37,7 @@ export default function PostDetailPage() {
   }, [id, supabase])
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUser(data.user ? { id: data.user.id } : null))
+    supabase.auth.getSession().then(({ data }) => setUser(data.session?.user ? { id: data.session.user.id } : null))
     loadData()
   }, [loadData, supabase])
 

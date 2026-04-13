@@ -13,7 +13,10 @@
       "Bash(npm uninstall:*)",
       "Bash(grep -rA5 \"function isChunkLike\" \"c:/Users/strakam/Desktop/Agenti/mohelnice-marketplace/node_modules/@supabase/ssr/\" --include=\"*.js\")",
       "Bash(grep -v \"^//\")",
-      "Bash(xargs grep:*)"
+      "Bash(xargs grep:*)",
+      "Bash(npx vercel:*)",
+      "Bash(taskkill /F /IM node.exe)",
+      "Bash(exit 0)"
     ]
   }
 }
