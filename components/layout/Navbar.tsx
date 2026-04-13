@@ -31,8 +31,8 @@ export default function Navbar() {
   // Zavři menu při změně stránky
   useEffect(() => { setMenuOpen(false) }, [pathname])
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut()
+  const handleSignOut = () => {
+    supabase.auth.signOut()
     window.location.href = '/'
   }
 
