@@ -1,32 +1,37 @@
+import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-// Optimistic auth check — docs: "Proxy should not be used as a full
-// session management solution, use it for optimistic checks only."
-// Full validation happens inside each page/route handler.
-export function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl
+// Proxy slouží pouze k refresh session cookies.
+// Auth ochrana chráněných stránek je řešena přímo v page komponentách přes getSession().
+export async function proxy(request: NextRequest) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  const protectedPaths = ['/pridat', '/profil', '/diskuze']
-  const isProtected = protectedPaths.some(p => pathname.startsWith(p))
-
-  const adminPath = pathname.startsWith('/admin')
-
-  if (isProtected || adminPath) {
-    // Optimistic check: does an auth cookie exist?
-    // Supabase splits large tokens into chunks: sb-...-auth-token.0, .1 etc.
-    const hasSession = request.cookies.getAll().some(
-      c => c.name.includes('-auth-token')
-    )
-
-    if (!hasSession) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/prihlaseni'
-      url.searchParams.set('redirect', pathname)
-      return NextResponse.redirect(url)
-    }
+  if (!supabaseUrl || !supabaseKey) {
+    return NextResponse.next({ request })
   }
 
-  return NextResponse.next()
+  let supabaseResponse = NextResponse.next({ request })
+
+  const supabase = createServerClient(supabaseUrl, supabaseKey, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll()
+      },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+        supabaseResponse = NextResponse.next({ request })
+        cookiesToSet.forEach(({ name, value, options }) =>
+          supabaseResponse.cookies.set(name, value, options)
+        )
+      },
+    },
+  })
+
+  // Refresh session — drží cookies aktuální
+  await supabase.auth.getSession()
+
+  return supabaseResponse
 }
 
 export const config = {
