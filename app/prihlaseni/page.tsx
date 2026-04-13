@@ -34,16 +34,21 @@ export default function PrihlaseniPage() {
     setError('')
     setLoading(true)
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
 
-    if (error) {
-      setError('Nesprávný e-mail nebo heslo.')
+      if (error) {
+        setError('Nesprávný e-mail nebo heslo.')
+        return
+      }
+
+      router.push(redirect)
+      router.refresh()
+    } catch {
+      setError('Připojení selhalo. Zkus to znovu.')
+    } finally {
       setLoading(false)
-      return
     }
-
-    router.push(redirect)
-    router.refresh()
   }
 
   return (
